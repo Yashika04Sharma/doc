@@ -1,0 +1,948 @@
+##################### Binary Classification: ##############################
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+from sklearn.datasets import make_blobs
+X,y=make_blobs(n_samples=400,n_features=2,
+               centers=2,random_state=100)
+X
+
+plt.scatter(X[:,0],X[:,1],c=y);
+
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test=train_test_split(X,y,
+                                  test_size=0.2,random_state=100)
+X_train.shape,X_test.shape,y_train.shape,y_test.shape
+
+
+### Building The Model ####
+
+model_1=tf.keras.Sequential()
+model_1.add(tf.keras.layers.Dense(8,activation='relu'))
+model_1.add(tf.keras.layers.Dense(1,activation='sigmoid'))
+
+#### Compiling the model ####
+
+model_1.compile(optimizer=tf.keras.optimizers.Adam(),
+                loss=tf.keras.losses.BinaryCrossentropy(),
+                metrics=['accuracy'])
+
+
+#### Training the Model ####
+tf.random.set_seed(100)
+history=model_1.fit(X_train,y_train,epochs=50)
+hist=pd.DataFrame(history.history)
+hist.plot();
+
+
+### Model Summary ###
+model_1.summary()
+
+### Plotting the Model ###
+
+from tensorflow.keras.utils import plot_model
+plot_model(model_1,show_shapes=True)
+
+### Prediction ###
+model_1.predict(X_test)
+
+
+
+
+############# Regression using Feed Forward Neural Network ############
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+from sklearn.datasets import fetch_california_housing
+
+
+house=fetch_california_housing()
+house
+
+
+house['data']
+
+
+house['data'].shape
+house['feature_names']
+
+# Feature set
+
+X=pd.DataFrame(house['data'],columns=house['feature_names'])
+X
+
+# Target
+
+house['target']
+
+house['target_names']
+
+
+y=pd.DataFrame(house['target'],columns=house['target_names'])
+y
+
+
+### Standardization ###
+
+from sklearn.preprocessing import StandardScaler
+
+sc=StandardScaler()
+
+X_scaled=sc.fit_transform(X)
+X_scaled
+
+
+
+### Train test split ###
+
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test=train_test_split(X_scaled,
+                      y, test_size=0.2, random_state=100)
+
+X_train.shape,X_test.shape,y_train.shape,y_test.shape
+
+
+### Building the model ###
+
+model_1=tf.keras.Sequential()
+model_1.add(tf.keras.layers.Dense(20,activation='relu'))
+model_1.add(tf.keras.layers.Dense(1))
+
+
+### Compiling the model ### 
+
+model_1.compile(optimizer=tf.keras.optimizers.Adam(),
+                loss=tf.keras.losses.MeanSquaredError(),
+                metrics=['mae'])
+
+
+### Training the model ###
+
+tf.random.set_seed(100)
+history=model_1.fit(X_train,y_train,epochs=100)
+hist=pd.DataFrame(history.history)
+hist.plot();
+
+
+### Model Summary ###
+model_1.summary()
+
+### Plotting the model ###
+
+from tensorflow.keras.utils import plot_model
+
+plot_model(model_1, show_shapes=True)
+
+
+### Evaluation ###
+test_mse,test_mae=model_1.evaluate(X_test,y_test)
+
+print('Test MSE:',test_mse)
+print('Train MSE:0.3076' )
+
+print('Test MAE:', test_mae)
+print('Train MAE:0.3835 ')
+
+
+
+### prediction using the model ###
+
+y_pred=model_1.predict(X_test)
+print('The predicted house prices:\n',y_pred)
+
+y_test
+
+
+
+
+##################### Multiclass Classification #######################
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+
+### Dataset ###
+from tensorflow.keras.datasets import fashion_mnist
+(X_train,y_train),(X_test,y_test)=fashion_mnist.load_data()
+X_train.shape,y_train.shape,X_test.shape,y_test.shape
+
+
+### Visualization of the dataset ###
+
+plt.imshow(X_train[0],'Greys')
+plt.title(y_train[0]);
+
+# Creating a dictionary of nos and respective fashion items
+
+fashion_dict={0:'T-shirt/top',
+1:'Trouser',
+2:'Pullover',
+3:'Dress',
+4:'Coat',
+5:'Sandal',
+6:'Shirt',
+7:'Sneaker',
+8:'Bag',
+9:'Ankle boot'}
+
+
+fashion_dict
+
+
+plt.imshow(X_train[0],'Greys')
+plt.title(fashion_dict[y_train[0]]);
+
+plt.imshow(X_train[10],'Greys')
+plt.title(fashion_dict[y_train[10]]);
+
+plt.imshow(X_train[100],'Greys')
+plt.title(fashion_dict[y_train[100]]);
+
+plt.imshow(X_train[500],'Greys')
+plt.title(fashion_dict[y_train[500]]);
+
+plt.imshow(X_train[1000],'Greys')
+plt.title(fashion_dict[y_train[1000]]);
+
+plt.imshow(X_train[3000],'Greys')
+plt.title(fashion_dict[y_train[3000]]);
+
+plt.imshow(X_train[5000],'Greys')
+plt.title(fashion_dict[y_train[5000]]);
+
+plt.imshow(X_train[15000],'Greys')
+plt.title(fashion_dict[y_train[15000]]);
+
+plt.imshow(X_train[45000],'Greys')
+plt.title(fashion_dict[y_train[45000]]);
+
+
+
+
+### Building the model ###
+
+fashion_1=tf.keras.Sequential()
+fashion_1.add(tf.keras.layers.Flatten())
+fashion_1.add(tf.keras.layers.Dense(300,activation='relu'))
+fashion_1.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+
+### Compiling the model ###
+
+fashion_1.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                  optimizer=tf.keras.optimizers.Adam(),
+                  metrics=['accuracy'])
+
+
+### Training the model ###
+
+tf.random.set_seed(100)
+history_1=fashion_1.fit(X_train,y_train,epochs=25)
+pd.DataFrame(history_1.history).plot();
+
+
+### Evaluation of the model ###
+
+test_loss,test_accuracy=fashion_1.evaluate(X_test,y_test)
+
+print('The Test Loss:',test_loss)
+print('The Test Accuracy:',test_accuracy)
+
+
+### Improving the model by adding one more hidden layer ###
+
+fashion_2=tf.keras.Sequential()
+fashion_2.add(tf.keras.layers.Flatten())
+fashion_2.add(tf.keras.layers.Dense(300,activation='relu'))
+
+## Adding a layer of 100 units
+fashion_2.add(tf.keras.layers.Dense(100,activation='relu'))
+
+fashion_2.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+
+fashion_2.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                  optimizer=tf.keras.optimizers.Adam(),
+                  metrics=['accuracy'])
+
+tf.random.set_seed(100)
+history_2=fashion_2.fit(X_train,y_train,epochs=25)
+pd.DataFrame(history_2.history).plot();
+
+
+
+test_loss,test_accuracy=fashion_2.evaluate(X_test,y_test)
+
+print('Test Loss:',test_loss)
+
+print('Test accuracy:',test_accuracy)
+
+
+### Adding one more hidden layer ###
+
+fashion_3=tf.keras.Sequential()
+fashion_3.add(tf.keras.layers.Flatten())
+fashion_3.add(tf.keras.layers.Dense(300,activation='relu'))
+fashion_3.add(tf.keras.layers.Dense(100,activation='relu'))## Adding a layer of 100 units
+
+# Adding a layer of 25 units
+fashion_3.add(tf.keras.layers.Dense(25,activation='relu'))
+
+## Adding a layer of 10 units
+fashion_3.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+
+
+fashion_3.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                  optimizer=tf.keras.optimizers.Adam(),
+                  metrics=['accuracy'])
+
+tf.random.set_seed(100)
+history_3=fashion_3.fit(X_train,y_train,epochs=25)
+pd.DataFrame(history_3.history).plot();
+
+
+
+
+### Improving the model by changing the number of units ###
+
+fashion_4=tf.keras.Sequential()
+fashion_4.add(tf.keras.layers.Flatten())
+
+# Changing the no of units 
+fashion_4.add(tf.keras.layers.Dense(200,activation='relu'))
+
+fashion_4.add(tf.keras.layers.Dense(100,activation='relu'))## Adding a layer of 100 units
+
+fashion_4.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+
+
+fashion_4.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                  optimizer=tf.keras.optimizers.Adam(),
+                  metrics=['accuracy'])
+
+tf.random.set_seed(100)
+history_4=fashion_4.fit(X_train,y_train,epochs=25)
+pd.DataFrame(history_4.history).plot();
+
+
+test_loss,test_accuracy=fashion_4.evaluate(X_test,y_test)
+
+print('Test Loss:',test_loss)
+print('Test Accuracy:',test_accuracy)
+
+
+### Model Summary ###
+
+fashion_2.summary()
+
+
+
+### Plotting the model ###
+
+from tensorflow.keras.utils import plot_model
+plot_model(fashion_2,show_shapes=True)
+
+
+### Prediction ###
+
+y_pred=fashion_2.predict(X_test)
+
+y_pred
+
+y_pred[0]
+
+np.argmax(y_pred[0])
+
+plt.imshow(X_test[0],'Greys')
+plt.title(fashion_dict[np.argmax(y_pred[0])]);
+
+plt.imshow(X_test[20],'Greys')
+plt.title(fashion_dict[np.argmax(y_pred[20])]);
+
+################ Hyper parameter tuning and Regularisation ############
+
+
+Hyper parameters
+•	No of layers
+•	No of units
+•	Activation function
+•	Loss function
+•	Optimizer
+•	Dropout rate
+•	Learning rate
+•	Epoch
+
+No of units:
+•	Output layer:
+o	Regression: One
+o	Binary classiifcation: One/ Two depends upon activation function
+o	Multi-class classification: No of classes.
+•	Input layer: Depends upon the no of features/values in the data point
+•	Hidden layer: Depends, generally between 10 and 100.
+
+
+Activation function
+•	Output layer
+o	Regression: Linear
+o	Binary classification: sigmoid (if the class labels are 0 and 1)
+                   tanh (if the class labels are -1 and 1)
+o	Multi-class classiifcation: softmax.
+•	Hidden layer: 'relu', in general.
+
+
+Loss function
+•	Regression: MAE, MSE(more preferred)
+•	Binary classification: BinaryCrossentropy
+•	Multi-class Classification: Categorical Crossentropy /
+                        Sparse Categorical Crossentropy
+
+Optimizer
+•	Adam, in general
+
+
+
+
+### Regularization ###
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+
+### Accessing the dataset ###
+
+from tensorflow.keras.datasets import mnist
+
+(X_train,y_train),(X_test,y_test)=mnist.load_data()
+
+X_train.shape,y_train.shape,X_test.shape,y_test.shape
+
+X_train[0]
+
+
+### Visualization ###
+
+plt.imshow(X_train[0],'gray')
+plt.title(y_train[0]);
+
+plt.imshow(X_train[10],'gray')
+plt.title(y_train[10]);
+
+
+plt.imshow(X_train[100],'gray')
+plt.title(y_train[100]);
+
+plt.imshow(X_train[1000],'gray')
+plt.title(y_train[1000]);
+
+plt.imshow(X_train[10000],'gray')
+plt.title(y_train[10000]);
+
+plt.imshow(X_train[40000],'gray')
+plt.title(y_train[40000]);
+
+pd.DataFrame(y_train).value_counts()
+
+
+### Building basic Model ###
+
+model_1=tf.keras.Sequential()
+model_1.add(tf.keras.layers.Flatten())
+model_1.add(tf.keras.layers.Dense(300, activation='relu'))
+model_1.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+
+# compiling the model
+model_1.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+
+
+# Training the model
+
+tf.random.set_seed(100)
+hist_1=model_1.fit(X_train,y_train,epochs=10)
+pd.DataFrame(hist_1.history).plot();
+
+
+# Evaluation of the model
+
+model_1.evaluate(X_test,y_test)
+
+
+### Model with normalization ###
+
+# Normalization
+
+normalizer=tf.keras.layers.Normalization()
+normalizer.adapt(X_train)
+normalizer.adapt(X_test)
+
+X_train=normalizer(X_train)
+X_test=normalizer(X_test)
+
+
+X_train[0]
+
+
+model_2=tf.keras.Sequential()
+model_2.add(tf.keras.layers.Flatten())
+model_2.add(tf.keras.layers.Dense(300, activation='relu'))
+model_2.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+model_2.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+
+# Training the model
+tf.random.set_seed(100)
+
+# X_train is the normalosed training set
+hist_2=model_2.fit(X_train,y_train,epochs=10)
+pd.DataFrame(hist_2.history).plot();
+
+
+model_2.evaluate(X_test,y_test)
+
+
+
+### Model with Cross Validation ###
+
+model_3=tf.keras.Sequential()
+model_3.add(tf.keras.layers.Flatten())
+model_3.add(tf.keras.layers.Dense(300, activation='relu'))
+model_3.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+model_3.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+
+# Training the model
+tf.random.set_seed(100)
+
+# validation_split
+hist_3=model_3.fit(X_train,y_train,epochs=10,validation_split=0.2)
+pd.DataFrame(hist_3.history).plot();
+
+
+
+model_3.evaluate(X_test,y_test)
+
+
+
+
+############################ Regularization ##########################
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+
+### Accessing the Dataset ###
+
+from tensorflow.keras.datasets.mnist import load_data
+(X_train,y_train),(X_test,y_test)=load_data()
+
+
+X_train.shape,y_train.shape,X_test.shape,y_test.shape
+
+### Visualization ### 
+
+plt.imshow(X_train[0],'gray')
+plt.title(y_train[0]);
+
+plt.imshow(X_train[50],'gray')
+plt.title(y_train[50]);
+
+### Building Basic Model ###
+
+model_1=tf.keras.Sequential()
+model_1.add(tf.keras.layers.Flatten())
+model_1.add(tf.keras.layers.Dense(300,activation='relu'))
+model_1.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+# Compiling the model
+model_1.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+# Training
+tf.random.set_seed(100)
+hist_1=model_1.fit(X_train,y_train,epochs=10)
+pd.DataFrame(hist_1.history).plot();
+
+
+print(' Evaluation Result:\n')
+
+model_1.evaluate(X_test,y_test)
+
+
+
+### Model with Normalization ### 
+
+normaliser=tf.keras.layers.Normalization()
+normaliser.adapt(X_train)
+normaliser.adapt(X_test)
+X_train=normaliser(X_train)
+X_test=normaliser(X_test)
+
+
+X_train[0]
+
+
+
+model_2=tf.keras.Sequential()
+model_2.add(tf.keras.layers.Flatten())
+model_2.add(tf.keras.layers.Dense(300,activation='relu'))
+model_2.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+# Compiling the model
+model_2.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+# Training
+tf.random.set_seed(100)
+hist_2=model_2.fit(X_train,y_train,epochs=10)
+pd.DataFrame(hist_2.history).plot();
+
+print(' Evaluation Result:\n')
+model_2.evaluate(X_test,y_test)
+
+
+
+### Model Validation ###
+
+model_3=tf.keras.Sequential()
+model_3.add(tf.keras.layers.Flatten())
+model_3.add(tf.keras.layers.Dense(300,activation='relu'))
+model_3.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+# Compiling the model
+model_3.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+# Training
+tf.random.set_seed(100)
+## Validation split
+hist_3=model_3.fit(X_train,y_train,epochs=10, validation_split=0.2)
+pd.DataFrame(hist_3.history).plot();
+
+print(' Evaluation Result:\n')
+model_3.evaluate(X_test,y_test)
+
+
+
+### Model Dropout ###
+
+model_4=tf.keras.Sequential()
+model_4.add(tf.keras.layers.Flatten())
+model_4.add(tf.keras.layers.Dense(300,activation='relu'))
+
+# Dropout layer
+model_4.add(tf.keras.layers.Dropout(0.1)) # 10% of units will be dropped
+
+model_4.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+# Compiling the model
+model_4.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+# Training
+tf.random.set_seed(100)
+## Validation split
+hist_4=model_4.fit(X_train,y_train,epochs=10, validation_split=0.2)
+pd.DataFrame(hist_4.history).plot();
+
+print(' Evaluation Result:\n')
+model_4.evaluate(X_test,y_test)
+
+
+
+### Model with Early Stop ###
+
+model_5=tf.keras.Sequential()
+model_5.add(tf.keras.layers.Flatten())
+model_5.add(tf.keras.layers.Dense(300,activation='relu'))
+model_5.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+# Compiling the model
+model_5.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+# Introducing early stop
+
+early_stop=tf.keras.callbacks.EarlyStopping(monitor='val_loss',patience=2)
+
+# Training
+tf.random.set_seed(100)
+## Validation split,callbacks
+hist_5=model_5.fit(X_train,y_train,epochs=10, validation_split=0.2,callbacks=[early_stop])
+pd.DataFrame(hist_5.history).plot();
+
+print(' Evaluation Result:\n')
+model_5.evaluate(X_test,y_test)
+
+
+
+### Model with Batch Normalization ###
+
+model_6=tf.keras.Sequential()
+model_6.add(tf.keras.layers.Flatten())
+model_6.add(tf.keras.layers.Dense(300,activation='relu'))
+
+# Batch Normalisation
+model_6.add(tf.keras.layers.BatchNormalization())
+model_6.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+# Compiling the model
+model_6.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+# Introducing early stop
+
+early_stop=tf.keras.callbacks.EarlyStopping(monitor='val_loss',patience=2)
+
+# Training
+tf.random.set_seed(100)
+## Validation split,callbacks
+hist_6=model_6.fit(X_train,y_train,epochs=10, validation_split=0.2,callbacks=[early_stop])
+pd.DataFrame(hist_6.history).plot();
+
+print(' Evaluation Result:\n')
+model_6.evaluate(X_test,y_test)
+
+
+### Model with 2 hidden layers ###
+
+model_7=tf.keras.Sequential()
+model_7.add(tf.keras.layers.Flatten())
+model_7.add(tf.keras.layers.Dense(300,activation='relu'))
+
+## Adding one more layer
+model_7.add(tf.keras.layers.Dense(100,activation='relu'))
+
+model_7.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+# Compiling the model
+model_7.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+# Introducing early stop
+
+early_stop=tf.keras.callbacks.EarlyStopping(monitor='val_loss',patience=2)
+
+# Training
+tf.random.set_seed(100)
+## Validation split,callbacks
+hist_7=model_7.fit(X_train,y_train,epochs=10, validation_split=0.2,callbacks=[early_stop])
+pd.DataFrame(hist_7.history).plot();
+
+print(' Evaluation Result:\n')
+model_7.evaluate(X_test,y_test)
+
+
+### model with changed number of units ###
+
+model_8=tf.keras.Sequential()
+model_8.add(tf.keras.layers.Flatten())
+
+# Change the no of units to 50
+model_8.add(tf.keras.layers.Dense(50,activation='relu'))
+
+model_8.add(tf.keras.layers.Dense(10,activation='softmax'))
+
+# Compiling the model
+model_8.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=['accuracy'])
+# Introducing early stop
+
+early_stop=tf.keras.callbacks.EarlyStopping(monitor='val_loss',patience=2)
+
+# Training
+tf.random.set_seed(100)
+## Validation split,callbacks
+hist_8=model_8.fit(X_train,y_train,epochs=10, validation_split=0.2,callbacks=[early_stop])
+pd.DataFrame(hist_8.history).plot();
+
+print(' Evaluation Result:\n')
+model_8.evaluate(X_test,y_test)
+
+
+### Saving the model ###
+
+model_8.save('best_mnist_model.h5')
+
+
+### Loading the model ###
+
+my_mnist=tf.keras.models.load_model('best_mnist_model.h5')
+
+my_mnist.evaluate(X_test,y_test)
+
+
+
+
+
+##################### Lecture 10 RNN #############################
+
+
+### Stock market prediction using LSTM ###
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+
+### Dataset Access ###
+
+adani=pd.read_csv('https://query1.finance.yahoo.com/v7/finance/download/ADANIPOWER.NS?period1=1646742145&period2=1678278145&interval=1d&events=history&includeAdjustedClose=true')
+
+adani
+
+
+# Use 'Close'
+
+data=adani['Close']
+
+
+data
+
+
+### Train test Split ###
+
+train=data[:200]
+test=data[200:]
+
+train 
+
+test
+
+
+### Visualization ###
+
+
+plt.figure(figsize=(15,6))
+plt.plot(train)
+plt.plot(test)
+plt.xlabel('Market day')
+plt.ylabel('Stock Price')
+plt.legend(['Train','Test']);
+
+
+
+### Standardization ###
+
+
+from sklearn.preprocessing import MinMaxScaler
+scaler=MinMaxScaler()
+
+train_scaled=scaler.fit_transform(np.array(train).reshape(-1,1))
+
+test_scaled=scaler.fit_transform(np.array(test).reshape(-1,1))
+
+
+
+
+train_scaled
+
+
+
+
+### Converting Test scaled to regression data ###
+
+X_train=[]
+y_train=[]
+# window_size=10
+
+for i in range(10,200):
+  X_train.append(train_scaled[i-10:i,0])
+  y_train.append(train_scaled[i])
+
+
+
+X_train
+
+y_train
+
+
+# Converting to np.array
+
+X_train=np.array(X_train)
+y_train=np.array(y_train)
+
+
+X_train.shape
+
+y_train.shape
+
+
+# Converting text data
+
+X_test=[]
+y_test=[]
+# window_size=10
+
+for i in range(10,50):
+  X_test.append(test_scaled[i-10:i,0])
+  y_test.append(test_scaled[i])
+
+
+X_test=np.array(X_test)
+y_test=np.array(y_test)
+
+
+
+X_test.shape
+
+y_test.shape
+
+
+
+
+### Model Building ###
+
+lstm=tf.keras.Sequential()
+lstm.add(tf.keras.layers.LSTM(50,return_sequences=True,
+                              input_shape=(X_train.shape[1],1))) # (10,1)
+lstm.add(tf.keras.layers.Dense(1))
+
+
+
+# Compiling
+
+lstm.compile(loss=tf.keras.losses.MeanSquaredError(),
+             optimizer=tf.keras.optimizers.Adam(),
+             metrics=['mae'])
+
+
+# Training
+
+tf.random.set_seed(10)
+hist=lstm.fit(X_train,y_train,epochs=100)
+pd.DataFrame(hist.history).plot();
+
+
+
+
+### Evaluation of the model ### 
+
+lstm.evaluate(X_test,y_test)
+
+
+lstm.summary()
+
+
+
